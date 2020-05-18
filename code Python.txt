@@ -1,0 +1,115 @@
+#Import Libraries
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+%matplotlib inline
+
+#Importing The DataSet
+
+
+dataset=pd.read_excel(r"C:\Users\Om Sai Ram\Downloads\Concrete_Data.xls")
+
+
+#Simplifying Column names, since they appear to be too lengthy
+
+
+
+req_col_names = ["Cement", "BlastFurnaceSlag", "FlyAsh", "Water", "Superplasticizer",
+                 "CoarseAggregate", "FineAggregare", "Age", "CC_Strength"]
+curr_col_names = list(dataset.columns)
+
+mapper = {}
+for i, name in enumerate(curr_col_names):
+    mapper[name] = req_col_names[i]
+
+dataset = dataset.rename(columns=mapper)
+len(dataset)
+dataset 
+dataset.describe()
+
+
+#Data Visualization
+#Checking the pairwise relations of Features
+
+
+sns.pairplot(dataset)
+plt.show()
+
+
+#There seems to be no high correlation between independant variables (features). This can be further confirmed by plotting the Pearson Correlation coefficients between the features.
+
+
+corr = dataset.corr()
+sns.heatmap(corr, annot=True, cmap='Blues')
+b, t = plt.ylim()
+plt.ylim(b+0.5, t-0.5)
+plt.title("Feature Correlation Heatmap")
+plt.show()
+
+
+#There are'nt any high correlations, except between Cement and Compressive Strength of Concrete. Which should be the case for strength.
+#EDA
+
+
+ax = sns.distplot(dataset.CC_Strength)
+ax.set_title("Compressive Strength Distribution")
+
+
+
+fig, ax = plt.subplots(figsize=(10,7))
+sns.scatterplot(y="CC_Strength", x="Cement", hue="Water", size="Age", data=dataset, ax=ax, sizes=(20, 200))
+ax.set_title("CC Strength vs (Cement, Age, Water)")
+ax.legend(loc="upper left", bbox_to_anchor=(1,1))
+plt.show()
+
+
+#Taking Care Of Missing Values
+
+dataset.isnull().any()
+
+#Label Encoding
+#OneHotEncoding
+
+
+
+#Separating Input Features and Target Variable.
+
+
+x=dataset.iloc[:,0:8].values
+y=dataset.iloc [:,8:9].values
+
+
+#Feature Scalling
+
+from sklearn.preprocessing import StandardScaler
+    sc=StandardScaler()
+    x=sc.fit_transform(x)
+    y=sc.fit_transform(y)
+
+#Standardizing the data i.e. to rescale the features to have a mean of zero and standard deviation of 1.
+
+#Splitting Data Into Train And Test
+
+
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=0)
+
+
+#Model Building
+
+
+Training And Testing The Model   
+from sklearn.ensemble import RandomForestRegressor
+reg = RandomForestRegressor(n_estimators=100)
+reg.fit(x_train, y_train)
+ypred1= reg.predict(x_test)
+
+#Evalution
+
+
+from sklearn.metrics import r2_score 
+accuracy = r2_score(y_test,y_pred1)
+accuracy
